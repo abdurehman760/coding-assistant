@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import { FileManagerService } from '../file-manager/file-manager.service';
 import { CommandExecutorService } from '../command-executor/command-executor.service';
 import { CodeGeneratorService } from '../code-generator/code-generator.service';
+import { MemoryService } from '../memory/memory.service';
 
 @Injectable()
 export class CommandParserService {
@@ -11,7 +12,8 @@ export class CommandParserService {
   constructor(
     private fileManager: FileManagerService,
     private commandExecutor: CommandExecutorService,
-    private codeGenerator: CodeGeneratorService
+    private codeGenerator: CodeGeneratorService,
+    private memoryService: MemoryService // Inject MemoryService
   ) {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
@@ -19,7 +21,9 @@ export class CommandParserService {
   }
 
   async parseCommand(command: string) {
-    const prompt = `Instruction: ${command}\nOutput:`;
+    const context = this.memoryService.get('sessionContext') || {};
+    // Process command with context
+    const prompt = `Instruction: ${command}\nContext: ${JSON.stringify(context)}\nOutput:`;
     const response = await this.openai.completions.create({
       model: 'use gpt-4o-mini-2024-07-18',
       prompt: prompt,
