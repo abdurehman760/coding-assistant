@@ -57,4 +57,32 @@ export class FileManagerService {
       throw error;
     }
   }
+
+  rename(command: any) {
+    const { oldPath, newPath } = command;
+    try {
+      if (this.fileExists(oldPath)) {
+        fs.renameSync(oldPath, newPath);
+        console.log(`File renamed from ${oldPath} to ${newPath}`);
+      } else {
+        console.log(`File not found: ${oldPath}`);
+      }
+    } catch (error) {
+      console.error(`Error renaming file: ${error.message}`);
+    }
+  }
+
+  copy(command: any) {
+    const { sourcePath, destinationPath } = command;
+    try {
+      if (this.fileExists(sourcePath)) {
+        fs.copyFileSync(sourcePath, destinationPath);
+        console.log(`File copied from ${sourcePath} to ${destinationPath}`);
+      } else {
+        console.log(`File not found: ${sourcePath}`);
+      }
+    } catch (error) {
+      console.error(`Error copying file: ${error.message}`);
+    }
+  }
 }

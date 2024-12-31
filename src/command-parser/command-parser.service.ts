@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { FileManagerService } from '../file-manager/file-manager.service';
+import { CommandExecutorService } from '../command-executor/command-executor.service';
 
 @Injectable()
 export class CommandParserService {
   private openai: OpenAI;
 
-  constructor(private fileManager: FileManagerService) {
+  constructor(
+    private fileManager: FileManagerService,
+    private commandExecutor: CommandExecutorService
+  ) {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
@@ -24,7 +28,7 @@ export class CommandParserService {
     return this.validateAndForwardCommand(parsedCommand);
   }
 
-  private validateAndForwardCommand(parsedCommand: any) {
+  private async validateAndForwardCommand(parsedCommand: any) {
     if (!parsedCommand || !parsedCommand.intent) {
       throw new Error('Invalid command format');
     }
@@ -35,6 +39,18 @@ export class CommandParserService {
         break;
       case 'delete':
         this.fileManager.delete(parsedCommand);
+        break;
+      case 'rename':
+        this.fileManager.rename(parsedCommand);
+        break;
+      case 'copy':
+        this.fileManager.copy(parsedCommand);
+        break;
+      case 'execute':
+        const { command, args } = parsedCommand;
+        const result = await this.commandExecutor.execute(command, args);
+        console.log('Command output:', result.stdout);
+        console.error('Command error:', result.stderr);
         break;
       // Add more cases as needed
       default:
