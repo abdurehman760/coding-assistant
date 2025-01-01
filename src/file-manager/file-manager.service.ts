@@ -4,9 +4,45 @@ import * as path from 'path';
 
 @Injectable()
 export class FileManagerService {
+  ensureDirectoryExists(dirPath: string): void {
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+  }
+
   generate(command: any) {
     const { filePath, content } = command;
     try {
+      // Ensure the directory exists
+      const directory = path.dirname(filePath);
+      this.ensureDirectoryExists(directory);
+      
+      this.writeFile(filePath, content);
+      console.log(`File generated at: ${filePath}`);
+    } catch (error) {
+      console.error(`Error generating file: ${error.message}`);
+    }
+  }
+
+  generateTextFile(command: any) {
+    const { fileName, folderPath, content } = command;
+    try {
+      // Ensure the directory exists
+      this.ensureDirectoryExists(folderPath);
+      const filePath = path.join(folderPath, `${fileName}.txt`);
+      this.writeFile(filePath, content);
+      console.log(`Text file generated at: ${filePath}`);
+    } catch (error) {
+      console.error(`Error generating text file: ${error.message}`);
+    }
+  }
+
+  generateFileWithExtension(command: any) {
+    const { fileName, fileExtension, folderPath, content } = command;
+    try {
+      // Ensure the directory exists
+      this.ensureDirectoryExists(folderPath);
+      const filePath = path.join(folderPath, `${fileName}.${fileExtension}`);
       this.writeFile(filePath, content);
       console.log(`File generated at: ${filePath}`);
     } catch (error) {
@@ -51,6 +87,10 @@ export class FileManagerService {
 
   writeFile(filePath: string, content: string): void {
     try {
+      // Ensure the directory exists
+      const directory = path.dirname(filePath);
+      this.ensureDirectoryExists(directory);
+      
       fs.writeFileSync(filePath, content, 'utf-8');
     } catch (error) {
       console.error(`Error writing file: ${error.message}`);

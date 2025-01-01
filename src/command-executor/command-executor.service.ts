@@ -21,4 +21,16 @@ export class CommandExecutorService {
       return { stdout: error.stdout || '', stderr: error.stderr || error.message };
     }
   }
+
+  async setupNestProject(command: any) {
+    const { directory } = command;
+    const fullCommand = `npx @nestjs/cli new ${directory}`;
+    try {
+      const { stdout, stderr } = await this.execAsync(fullCommand);
+      console.log('Nest project setup output:', stdout);
+      console.error('Nest project setup error:', stderr);
+    } catch (error) {
+      console.error('Error setting up Nest project:', error.message);
+    }
+  }
 }

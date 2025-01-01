@@ -1,31 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import * as readlineSync from 'readline-sync';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { CommandParserService } from '../command-parser/command-parser.service';
+import * as readline from 'readline';
 
 @Injectable()
-export class CliService {
-  private chalk: any;
+export class CliService implements OnModuleInit {
+  constructor(private readonly commandParser: CommandParserService) {}
 
-  constructor(private readonly commandParserService: CommandParserService) {
-    // Removed this.loadChalk() from constructor
+  onModuleInit() {
+    this.startCli();
   }
 
-  private async loadChalk() {
-    const chalkModule = await import('chalk');
-    this.chalk = chalkModule.default;
-  }
+  private startCli() {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
 
-  async start() {
-    await this.loadChalk(); // Ensure chalk is loaded before use
-    console.log(this.chalk.green('Hello! How can I assist you?'));
-    while (true) {
-      const input = readlineSync.question('> ');
-      if (input.trim() === 'stop') {
-        console.log('Session ended. Goodbye!');
-        break;
+    rl.on('line', async (input) => {
+      try {
+        const result = await this.commandParser.parseCommand(input);
+        console.log('Command result:', result);
+      } catch (error) {
+        console.error('Error processing command:', error.message);
       }
-      // Pass input to the Command Parser
-      this.commandParserService.parseCommand(input);
-    }
+    });
+
+    console.log('CLI is ready. Type your commands below:');
   }
 }
