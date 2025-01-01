@@ -58,7 +58,13 @@ export class CommandParserService {
       },
       {
         "intent": "setupNestProject",
-        "directory": "my-nest-app"
+        "directory": "E:/Texagon/testing",
+        "appName": "MyNestApp"
+      },
+      {
+        "intent": "setupReactProject",
+        "directory": "E:/Texagon/testing",
+        "appName": "MyApp"
       },
       {
         "intent": "reviewCode",
@@ -67,6 +73,21 @@ export class CommandParserService {
       {
         "intent": "delete",
         "filePath": "src/components/OldComponent.tsx"
+      },
+      {
+        "intent": "rename",
+        "oldPath": "src/components/ReactHeader.js",
+        "newPath": "src/components/NewComponent.js"
+      },
+      {
+        "intent": "copy",
+        "sourcePath": "src/components/ReactHeader.js",
+        "destinationPath": "src/ReactHeader.js"
+      },
+      {
+        "intent": "move",
+        "sourcePath": "src/components/ReactHeader.js",
+        "destinationPath": "src/ReactHeader.js"
       }`
     };
 
@@ -117,20 +138,32 @@ export class CommandParserService {
       case 'copy':
         this.fileManager.copy(parsedCommand);
         break;
+      case 'move':
+        this.fileManager.move(parsedCommand);
+        break;
       case 'execute':
         const { command, args } = parsedCommand;
         const result = await this.commandExecutor.execute(command, args);
         console.log('Command output:', result.stdout);
         console.error('Command error:', result.stderr);
         break;
+      case 'setupNestProject':
+        await this.commandExecutor.setupNestProject(parsedCommand);
+        break;
+      case 'setupReactProject':
+        await this.commandExecutor.setupReactProject(parsedCommand);
+        break;
+      case 'installDependencies':
+        await this.commandExecutor.installDependencies(parsedCommand);
+        break;
+      case 'runBuild':
+        await this.commandExecutor.runBuild(parsedCommand);
+        break;
       case 'generateComponent':
         await this.codeGenerator.generateComponent(parsedCommand);
         break;
       case 'editFile':
         await this.codeGenerator.editFile(parsedCommand);
-        break;
-      case 'setupNestProject':
-        await this.commandExecutor.setupNestProject(parsedCommand);
         break;
       case 'reviewCode':
         await this.codeGenerator.reviewCode(parsedCommand);

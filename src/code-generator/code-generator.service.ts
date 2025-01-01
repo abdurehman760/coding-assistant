@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { FileManagerService } from '../file-manager/file-manager.service';
 import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class CodeGeneratorService {
@@ -62,15 +63,40 @@ export class CodeGeneratorService {
 
   async reviewCode(command: any) {
     const { directory } = command;
-    const prompt = `Review the code in the following directory: ${directory}`;
+    const files = this.getFilesInDirectory(directory);
+    let prompt = `Review the code in the following directory: ${directory}. Provide feedback on structure, naming conventions, and any potential improvements. Ensure to cover aspects such as directory organization, modularity, file naming, variable and function names, class names, constants, documentation, error handling, testing, and performance.\n\n`;
+
+    files.forEach(file => {
+      const content = this.fileManager.readFile(file);
+      prompt += `File: ${file}\n${content}\n\n`;
+    });
+
     const review = await this.generateCode(prompt);
-    console.log(`Code review for ${directory}:\n${review}`);
+    const reviewFilePath = path.join(directory, 'code-review.txt');
+    this.fileManager.writeFile(reviewFilePath, review);
+    console.log(`Code review generated at: ${reviewFilePath}`);
+  }
+
+  private getFilesInDirectory(directory: string): string[] {
+    let files: string[] = [];
+    const items = fs.readdirSync(directory);
+
+    items.forEach(item => {
+      const fullPath = path.join(directory, item);
+      if (fs.statSync(fullPath).isDirectory()) {
+        files = files.concat(this.getFilesInDirectory(fullPath));
+      } else {
+        files.push(fullPath);
+      }
+    });
+
+    return files;
   }
 
   async editFile(command: any) {
     const { filePath, instructions } = command;
     const existingContent = this.fileManager.readFile(filePath);
-    const prompt = `Edit the following file based on these instructions:\n${instructions}\n\nFile content:\n${existingContent}`;
+    const prompt = `Edit the following file based on these instructions:\n${instructions}\n\nFile content:\n${existingContent}\n\nEnsure to add comments where the editing happens and do not include explanations or markdown formatting.`;
     const editedCode = await this.generateCode(prompt);
     this.fileManager.writeFile(filePath, editedCode);
     console.log(`File edited at: ${filePath}`);

@@ -101,12 +101,16 @@ export class FileManagerService {
   rename(command: any) {
     const { oldPath, newPath } = command;
     try {
-      if (this.fileExists(oldPath)) {
-        fs.renameSync(oldPath, newPath);
-        console.log(`File renamed from ${oldPath} to ${newPath}`);
-      } else {
-        console.log(`File not found: ${oldPath}`);
+      if (!this.fileExists(oldPath)) {
+        console.error(`File not found: ${oldPath}`);
+        return;
       }
+      if (this.fileExists(newPath)) {
+        console.error(`File already exists at new path: ${newPath}`);
+        return;
+      }
+      fs.renameSync(oldPath, newPath);
+      console.log(`File renamed from ${oldPath} to ${newPath}`);
     } catch (error) {
       console.error(`Error renaming file: ${error.message}`);
     }
@@ -123,6 +127,20 @@ export class FileManagerService {
       }
     } catch (error) {
       console.error(`Error copying file: ${error.message}`);
+    }
+  }
+
+  move(command: any) {
+    const { sourcePath, destinationPath } = command;
+    try {
+      if (this.fileExists(sourcePath)) {
+        fs.renameSync(sourcePath, destinationPath);
+        console.log(`File moved from ${sourcePath} to ${destinationPath}`);
+      } else {
+        console.log(`File not found: ${sourcePath}`);
+      }
+    } catch (error) {
+      console.error(`Error moving file: ${error.message}`);
     }
   }
 }
