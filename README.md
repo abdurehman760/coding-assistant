@@ -16,7 +16,7 @@ This project provides a coding assistant bot that can perform various tasks such
 
 ## Demo
 
-Check out the watch demo video [here](https://your-demo-link.com).
+Check out the watch demo video [here]([https://your-demo-link.com](https://drive.google.com/file/d/1YVuDRyKXfFcZH09bqYBVpAlmY4VRvUas/view?usp=drivesdk)).
 
 ## Usage
 
